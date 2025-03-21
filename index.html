@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Виджет погоды</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script> <!-- Подключение Lottie -->
+    <script src="https://darkskyapp.github.io/skycons/skycons.js"></script> <!-- Библиотека анимаций -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         .weather-widget {
@@ -15,15 +15,17 @@
             align-items: center; justify-content: space-evenly;
             border-radius: 10px; padding: 10px; text-align: center;
         }
-        .weather-icon { width: 50px; height: 50px; }
-        .temperature { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .weather-icon canvas { width: 50px; height: 50px; }
+        .temperature { font-size: 16px; font-weight: bold; }
+        .details { font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
 
     <div class="weather-widget">
-        <div class="weather-icon" id="weather-animation"></div> <!-- Контейнер для анимации -->
+        <div class="weather-icon">
+            <canvas id="weather-animation"></canvas> <!-- Канвас для анимации -->
+        </div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -35,19 +37,25 @@
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
         const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
 
-        // Соответствие кодов погоды анимациям Lottie
-        const weatherAnimations = {
-            'clear': 'https://assets7.lottiefiles.com/packages/lf20_vx1gn3nl.json', // Солнце
-            'partly-cloudy': 'https://assets2.lottiefiles.com/packages/lf20_pedjzj.json', // Солнце и облака
-            'cloudy': 'https://assets9.lottiefiles.com/packages/lf20_xlpdxvkq.json', // Облака
-            'overcast': 'https://assets9.lottiefiles.com/packages/lf20_jv3gjwkl.json', // Тучи
-            'rain': 'https://assets9.lottiefiles.com/packages/lf20_rpydzzvx.json', // Дождь
-            'showers': 'https://assets3.lottiefiles.com/packages/lf20_pWJ1C4.json', // Ливень
-            'thunderstorm': 'https://assets4.lottiefiles.com/packages/lf20_vn4rdj.json', // Гроза
-            'snow': 'https://assets6.lottiefiles.com/packages/lf20_3h5jhx9b.json', // Снег
-            'snow-showers': 'https://assets3.lottiefiles.com/packages/lf20_3jpxvhjv.json', // Сильный снег
-            'wet-snow': 'https://assets3.lottiefiles.com/packages/lf20_7H6fQ7.json', // Дождь со снегом
-            'hail': 'https://assets4.lottiefiles.com/packages/lf20_0zmyspby.json' // Град
+        const weatherMap = {
+            'clear': ['Ясно', 'CLEAR_DAY'],
+            'partly-cloudy': ['Малооблачно', 'PARTLY_CLOUDY_DAY'],
+            'cloudy': ['Облачно', 'CLOUDY'],
+            'overcast': ['Пасмурно', 'CLOUDY'],
+            'drizzle': ['Морось', 'RAIN'],
+            'light-rain': ['Небольшой дождь', 'RAIN'],
+            'rain': ['Дождь', 'RAIN'],
+            'moderate-rain': ['Умеренный дождь', 'RAIN'],
+            'heavy-rain': ['Сильный дождь', 'RAIN'],
+            'showers': ['Ливень', 'RAIN'],
+            'wet-snow': ['Дождь со снегом', 'SLEET'],
+            'light-snow': ['Небольшой снег', 'SNOW'],
+            'snow': ['Снег', 'SNOW'],
+            'snow-showers': ['Снегопад', 'SNOW'],
+            'hail': ['Град', 'SLEET'],
+            'thunderstorm': ['Гроза', 'WIND'],
+            'thunderstorm-with-rain': ['Гроза с дождем', 'RAIN'],
+            'thunderstorm-with-hail': ['Гроза с градом', 'SLEET']
         };
 
         async function getWeather() {
@@ -57,28 +65,19 @@
 
                 if (!fact) throw new Error('Ошибка данных API');
 
+                const [description, icon] = weatherMap[fact.condition] || ['Неизвестно', 'CLOUDY'];
+                
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
-                document.querySelector('#weather-condition').textContent = fact.condition.replace('-', ' ');
+                document.querySelector('#weather-condition').textContent = description;
 
-                // Запуск анимации
-                const animationUrl = weatherAnimations[fact.condition] || weatherAnimations['cloudy'];
-                loadLottieAnimation(animationUrl);
+                // Инициализация анимации
+                const skycons = new Skycons({ color: 'white' });
+                skycons.set('weather-animation', Skycons[icon]);
+                skycons.play();
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
-        }
-
-        function loadLottieAnimation(url) {
-            const container = document.querySelector('#weather-animation');
-            container.innerHTML = ''; // Очищаем контейнер перед загрузкой новой анимации
-            lottie.loadAnimation({
-                container: container,
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: url
-            });
         }
 
         getWeather();
