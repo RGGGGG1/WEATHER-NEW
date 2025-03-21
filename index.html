@@ -1,35 +1,57 @@
-<script>
-    const apiKey = '020d0acf66c731a155efa04f08d3667e';
-    const city = 'Kaliningrad,ru';
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=ru`;
-
-    async function getWeather() {
-        try {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-
-            console.log('Ответ API:', data); // Проверяем, что пришло от сервера
-
-            if (data.cod === 200) {
-                document.getElementById('temperature').textContent = `${Math.round(data.main.temp)}°C`;
-                document.getElementById('wind-speed').textContent = `${data.wind.speed} м/с`;
-                document.getElementById('pressure').textContent = `${data.main.pressure} гПа`;
-
-                // Проверка кода иконки
-                if (data.weather && data.weather[0] && data.weather[0].icon) {
-                    const iconCode = data.weather[0].icon;
-                    document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${iconCode}.png`;
-                } else {
-                    console.error('Ошибка: нет данных об иконке погоды');
-                }
-            } else {
-                console.error('Ошибка API:', data.message);
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виджет погоды</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .weather-widget {
+            width: 120px; height: 120px;
+            background: #000; color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: space-evenly;
+            border-radius: 10px; padding: 10px; text-align: center;
         }
-    }
+        .weather-icon img { width: 40px; height: 40px; }
+        .temperature { font-size: 14px; font-weight: bold; }
+        .details { font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    </style>
+</head>
+<body>
 
-    getWeather();
-    setInterval(getWeather, 600000);
-</script>
+    <div class="weather-widget">
+        <div class="weather-icon"><img id="weather-icon" src="" alt="Иконка погоды"></div>
+        <div class="temperature" id="temperature">--°C</div>
+        <div class="details">
+            <div>Давление: <span id="pressure">-- мм рт. ст.</span></div>
+            <div>Ветер: <span id="wind-speed">-- м/с</span></div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
+
+        async function getWeather() {
+            try {
+                const response = await fetch(apiUrl, { headers: { 'X-Yandex-API-Key': apiKey } });
+                const { fact } = await response.json();
+                if (!fact) throw new Error('Ошибка данных API');
+
+                document.querySelector('#temperature').textContent = `${fact.temp}°C`;
+                document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
+                document.querySelector('#pressure').textContent = `${fact.pressure_mm} мм рт. ст.`;
+                document.querySelector('#weather-icon').src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
+            } catch (error) {
+                console.error('Ошибка запроса:', error);
+            }
+        }
+
+        getWeather();
+        setInterval(getWeather, 600000);
+    </script>
+
+</body>
+</html>
