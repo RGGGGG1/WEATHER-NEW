@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Виджет погоды</title>
-    <script src="https://darkskyapp.github.io/skycons/skycons.js"></script> <!-- Библиотека анимаций -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         .weather-widget {
@@ -15,7 +14,7 @@
             align-items: center; justify-content: space-evenly;
             border-radius: 10px; padding: 10px; text-align: center;
         }
-        .weather-icon canvas { width: 50px; height: 50px; }
+        .weather-icon img { width: 40px; height: 40px; }
         .temperature { font-size: 16px; font-weight: bold; }
         .details { font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     </style>
@@ -23,9 +22,7 @@
 <body>
 
     <div class="weather-widget">
-        <div class="weather-icon">
-            <canvas id="weather-animation"></canvas> <!-- Канвас для анимации -->
-        </div>
+        <div class="weather-icon"><img id="weather-icon" src="" alt="Иконка погоды"></div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -37,44 +34,39 @@
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
         const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
 
-        const weatherMap = {
-            'clear': ['Ясно', 'CLEAR_DAY'],
-            'partly-cloudy': ['Малооблачно', 'PARTLY_CLOUDY_DAY'],
-            'cloudy': ['Облачно', 'CLOUDY'],
-            'overcast': ['Пасмурно', 'CLOUDY'],
-            'drizzle': ['Морось', 'RAIN'],
-            'light-rain': ['Небольшой дождь', 'RAIN'],
-            'rain': ['Дождь', 'RAIN'],
-            'moderate-rain': ['Умеренный дождь', 'RAIN'],
-            'heavy-rain': ['Сильный дождь', 'RAIN'],
-            'showers': ['Ливень', 'RAIN'],
-            'wet-snow': ['Дождь со снегом', 'SLEET'],
-            'light-snow': ['Небольшой снег', 'SNOW'],
-            'snow': ['Снег', 'SNOW'],
-            'snow-showers': ['Снегопад', 'SNOW'],
-            'hail': ['Град', 'SLEET'],
-            'thunderstorm': ['Гроза', 'WIND'],
-            'thunderstorm-with-rain': ['Гроза с дождем', 'RAIN'],
-            'thunderstorm-with-hail': ['Гроза с градом', 'SLEET']
+        // Словарь для перевода условий погоды
+        const conditionsMap = {
+            'clear': 'Ясно',
+            'partly-cloudy': 'Малооблачно',
+            'cloudy': 'Облачно',
+            'overcast': 'Пасмурно',
+            'drizzle': 'Морось',
+            'light-rain': 'Небольшой дождь',
+            'rain': 'Дождь',
+            'moderate-rain': 'Умеренный дождь',
+            'heavy-rain': 'Сильный дождь',
+            'continuous-heavy-rain': 'Затяжной дождь',
+            'showers': 'Ливень',
+            'wet-snow': 'Дождь со снегом',
+            'light-snow': 'Небольшой снег',
+            'snow': 'Снег',
+            'snow-showers': 'Снегопад',
+            'hail': 'Град',
+            'thunderstorm': 'Гроза',
+            'thunderstorm-with-rain': 'Гроза с дождем',
+            'thunderstorm-with-hail': 'Гроза с градом'
         };
 
         async function getWeather() {
             try {
                 const response = await fetch(apiUrl, { headers: { 'X-Yandex-API-Key': apiKey } });
                 const { fact } = await response.json();
-
                 if (!fact) throw new Error('Ошибка данных API');
 
-                const [description, icon] = weatherMap[fact.condition] || ['Неизвестно', 'CLOUDY'];
-                
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
-                document.querySelector('#weather-condition').textContent = description;
-
-                // Инициализация анимации
-                const skycons = new Skycons({ color: 'white' });
-                skycons.set('weather-animation', Skycons[icon]);
-                skycons.play();
+                document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
+                document.querySelector('#weather-icon').src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
