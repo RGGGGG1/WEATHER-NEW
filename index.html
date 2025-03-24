@@ -14,40 +14,64 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: space-evenly;
             text-align: center;
+            position: relative;
         }
-        .weather-icon img { 
+        .weather-icon {
             width: 50px; height: 50px;
+            position: relative;
+        }
+        .sun {
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, yellow, orange);
+            border-radius: 50%;
+            position: absolute;
+            animation: rotate-sun 5s linear infinite;
+        }
+        .rain {
+            position: absolute;
+            width: 2px; height: 10px;
+            background: lightblue;
+            top: 50%; left: 50%;
+            animation: rain-fall 0.5s linear infinite;
+        }
+        .snow {
+            position: absolute;
+            width: 5px; height: 5px;
+            background: white;
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            animation: snow-fall 1s linear infinite;
+        }
+        .cloud {
+            width: 50px; height: 30px;
+            background: lightgray;
+            border-radius: 50%;
+            position: absolute;
+            animation: move-clouds 3s linear infinite alternate;
+        }
+        @keyframes rotate-sun {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes rain-fall {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(10px); opacity: 0; }
+        }
+        @keyframes snow-fall {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(10px); opacity: 0; }
+        }
+        @keyframes move-clouds {
+            from { transform: translateX(-5px); }
+            to { transform: translateX(5px); }
         }
         .temperature { font-size: 18px; font-weight: bold; }
         .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-
-        /* Анимации иконок */
-        @keyframes sun-rays {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes rain-fall {
-            0% { transform: translateY(-5px); opacity: 1; }
-            100% { transform: translateY(5px); opacity: 0.5; }
-        }
-        @keyframes snow-fall {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(10px); }
-        }
-        @keyframes clouds-move {
-            0% { transform: translateX(-5px); }
-            100% { transform: translateX(5px); }
-        }
-
-        .sun img { animation: sun-rays 10s linear infinite; }
-        .rain img { animation: rain-fall 1s ease-in-out infinite alternate; }
-        .snow img { animation: snow-fall 2s ease-in-out infinite alternate; }
-        .clouds img { animation: clouds-move 3s ease-in-out infinite alternate; }
     </style>
 </head>
 <body>
     <div class="weather-widget">
-        <div class="weather-icon"><img id="weather-icon" src="" alt="Иконка погоды"></div>
+        <div class="weather-icon" id="weather-animation"></div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -59,25 +83,50 @@
         const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=56.0184&lon=92.8672&lang=ru_RU&limit=1';
 
         const conditionsMap = {
-            'clear': { text: 'Ясно', class: 'sun' },
-            'partly-cloudy': { text: 'Малооблачно', class: 'clouds' },
-            'cloudy': { text: 'Облачно', class: 'clouds' },
-            'overcast': { text: 'Пасмурно', class: 'clouds' },
-            'drizzle': { text: 'Морось', class: 'rain' },
-            'light-rain': { text: 'Небольшой дождь', class: 'rain' },
-            'rain': { text: 'Дождь', class: 'rain' },
-            'moderate-rain': { text: 'Умеренный дождь', class: 'rain' },
-            'heavy-rain': { text: 'Сильный дождь', class: 'rain' },
-            'showers': { text: 'Ливень', class: 'rain' },
-            'wet-snow': { text: 'Дождь со снегом', class: 'snow' },
-            'light-snow': { text: 'Небольшой снег', class: 'snow' },
-            'snow': { text: 'Снег', class: 'snow' },
-            'snow-showers': { text: 'Снегопад', class: 'snow' },
-            'hail': { text: 'Град', class: 'snow' },
-            'thunderstorm': { text: 'Гроза', class: 'rain' },
-            'thunderstorm-with-rain': { text: 'Гроза с дождем', class: 'rain' },
-            'thunderstorm-with-hail': { text: 'Гроза с градом', class: 'snow' }
+            'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
+            'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
+            'heavy-rain': 'Сильный дождь', 'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень',
+            'wet-snow': 'Дождь со снегом', 'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
+            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
+            'thunderstorm-with-hail': 'Гроза с градом'
         };
+
+        function setWeatherAnimation(condition) {
+            const iconContainer = document.getElementById('weather-animation');
+            iconContainer.innerHTML = '';
+
+            if (condition === 'clear') {
+                let sun = document.createElement('div');
+                sun.classList.add('sun');
+                iconContainer.appendChild(sun);
+            } else if (condition.includes('rain')) {
+                let cloud = document.createElement('div');
+                cloud.classList.add('cloud');
+                iconContainer.appendChild(cloud);
+                for (let i = 0; i < 5; i++) {
+                    let drop = document.createElement('div');
+                    drop.classList.add('rain');
+                    drop.style.left = `${Math.random() * 40}px`;
+                    drop.style.animationDelay = `${Math.random()}s`;
+                    iconContainer.appendChild(drop);
+                }
+            } else if (condition.includes('snow')) {
+                let cloud = document.createElement('div');
+                cloud.classList.add('cloud');
+                iconContainer.appendChild(cloud);
+                for (let i = 0; i < 5; i++) {
+                    let snowflake = document.createElement('div');
+                    snowflake.classList.add('snow');
+                    snowflake.style.left = `${Math.random() * 40}px`;
+                    snowflake.style.animationDelay = `${Math.random()}s`;
+                    iconContainer.appendChild(snowflake);
+                }
+            } else if (condition.includes('cloud')) {
+                let cloud = document.createElement('div');
+                cloud.classList.add('cloud');
+                iconContainer.appendChild(cloud);
+            }
+        }
 
         async function getWeather() {
             try {
@@ -87,15 +136,9 @@
 
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
+                document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
 
-                const condition = conditionsMap[fact.condition] || { text: 'Неизвестно', class: '' };
-                document.querySelector('#weather-condition').textContent = condition.text;
-
-                const icon = document.querySelector('#weather-icon');
-                icon.src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
-
-                const weatherIconDiv = document.querySelector('.weather-icon');
-                weatherIconDiv.className = `weather-icon ${condition.class}`;
+                setWeatherAnimation(fact.condition);
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
