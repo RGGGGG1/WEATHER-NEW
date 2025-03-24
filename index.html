@@ -20,6 +20,34 @@
             width: 50px; height: 50px;
         }
 
+        /* Детализированное облако */
+        .cloud {
+            position: absolute;
+            top: 5px;
+            width: 55px;
+            height: 30px;
+            background: lightgray;
+            border-radius: 20px;
+        }
+        .cloud::before, .cloud::after {
+            content: "";
+            position: absolute;
+            background: lightgray;
+            border-radius: 50%;
+        }
+        .cloud::before {
+            width: 25px;
+            height: 25px;
+            top: -10px;
+            left: 5px;
+        }
+        .cloud::after {
+            width: 30px;
+            height: 30px;
+            top: -15px;
+            right: 5px;
+        }
+
         /* Анимация солнца */
         .sun {
             width: 30px;
@@ -57,21 +85,6 @@
         @keyframes rotate {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        /* Облако */
-        .cloud {
-            width: 50px;
-            height: 25px;
-            background: lightgray;
-            border-radius: 50%;
-            position: absolute;
-            top: 5px;
-            animation: cloud-move 3s infinite alternate ease-in-out;
-        }
-        @keyframes cloud-move {
-            0% { transform: translateX(-3px); }
-            100% { transform: translateX(3px); }
         }
 
         /* Дождь */
@@ -162,17 +175,6 @@
                         drop.style.left = `${Math.random() * 40}px`;
                         drop.style.animationDelay = `${Math.random()}s`;
                         rainContainer.appendChild(drop);
-                    }
-                } else if (fact.condition.includes('snow')) {
-                    iconContainer.innerHTML = `<div class="cloud"></div><div class="snow"></div>`;
-                    const snowContainer = iconContainer.querySelector('.snow');
-                    for (let i = 0; i < 5; i++) {
-                        const flake = document.createElement('div');
-                        flake.className = 'flake';
-                        flake.textContent = '❄';
-                        flake.style.left = `${Math.random() * 40}px`;
-                        flake.style.animationDelay = `${Math.random()}s`;
-                        snowContainer.appendChild(flake);
                     }
                 }
 
