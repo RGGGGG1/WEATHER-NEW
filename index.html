@@ -15,96 +15,14 @@
             align-items: center; justify-content: space-evenly;
             text-align: center;
         }
-        .weather-icon {
-            position: relative;
-            width: 60px;
-            height: 60px;
-        }
-        /* Солнце */
-        .sun {
-            width: 30px; height: 30px;
-            background: yellow;
-            border-radius: 50%;
-            position: absolute;
-            top: 15px; left: 15px;
-        }
-        .sun-rays {
-            position: absolute;
-            width: 60px; height: 60px;
-            top: 0; left: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: rotate 5s linear infinite;
-        }
-        .sun-rays div {
-            position: absolute;
-            width: 4px; height: 12px;
-            background: yellow;
-            border-radius: 2px;
-        }
-        .sun-rays div:nth-child(1) { transform: rotate(0deg) translateY(-20px); }
-        .sun-rays div:nth-child(2) { transform: rotate(45deg) translateY(-20px); }
-        .sun-rays div:nth-child(3) { transform: rotate(90deg) translateY(-20px); }
-        .sun-rays div:nth-child(4) { transform: rotate(135deg) translateY(-20px); }
-        .sun-rays div:nth-child(5) { transform: rotate(180deg) translateY(-20px); }
-        .sun-rays div:nth-child(6) { transform: rotate(225deg) translateY(-20px); }
-        .sun-rays div:nth-child(7) { transform: rotate(270deg) translateY(-20px); }
-        .sun-rays div:nth-child(8) { transform: rotate(315deg) translateY(-20px); }
-
-        /* Облака */
-        .cloud {
-            position: absolute;
-            width: 50px; height: 30px;
-            background: lightgray;
-            border-radius: 20px;
-            top: 15px; left: 5px;
-            animation: moveCloud 3s linear infinite alternate;
-        }
-
-        /* Дождь */
-        .rain, .snow {
-            position: absolute;
-            width: 4px; height: 10px;
-            background: lightblue;
-            border-radius: 2px;
-            animation: fall 1s linear infinite;
-        }
-
-        /* Гроза */
-        .thunder {
-            position: absolute;
-            width: 10px; height: 20px;
-            background: yellow;
-            clip-path: polygon(0% 0%, 50% 50%, 30% 50%, 70% 100%, 40% 70%, 60% 70%);
-            left: 25px; top: 35px;
-            animation: flash 0.5s infinite alternate;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        @keyframes moveCloud {
-            from { left: 0; }
-            to { left: 10px; }
-        }
-        @keyframes fall {
-            from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(40px); opacity: 0; }
-        }
-        @keyframes flash {
-            0% { opacity: 1; }
-            100% { opacity: 0.2; }
-        }
-
+        .weather-icon img { width: 50px; height: 50px; }
         .temperature { font-size: 18px; font-weight: bold; }
         .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
     <div class="weather-widget">
-        <div class="weather-icon" id="weather-icon"></div>
+        <div class="weather-icon"><img id="weather-icon" src="" alt="Иконка погоды"></div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -113,13 +31,15 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=56.0153&lon=92.8932&lang=ru_RU&limit=1';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=55.0084&lon=82.9357&lang=ru_RU&limit=1';
 
         const conditionsMap = {
             'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
             'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
-            'heavy-rain': 'Сильный дождь', 'showers': 'Ливень', 'thunderstorm': 'Гроза',
-            'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад'
+            'heavy-rain': 'Сильный дождь', 'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень',
+            'wet-snow': 'Дождь со снегом', 'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
+            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
+            'thunderstorm-with-hail': 'Гроза с градом'
         };
 
         async function getWeather() {
@@ -131,38 +51,9 @@
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
-
-                const iconContainer = document.querySelector('#weather-icon');
-                iconContainer.innerHTML = '';
-
-                if (fact.condition === 'clear') {
-                    iconContainer.innerHTML = '<div class="sun-rays">' +
-                        '<div></div><div></div><div></div><div></div>' +
-                        '<div></div><div></div><div></div><div></div>' +
-                        '</div><div class="sun"></div>';
-                } else if (fact.condition.includes('cloudy') || fact.condition.includes('overcast')) {
-                    iconContainer.innerHTML = '<div class="cloud"></div>';
-                } else if (fact.condition.includes('rain')) {
-                    iconContainer.innerHTML = '<div class="cloud"></div>';
-                    addParticles('rain', iconContainer);
-                } else if (fact.condition.includes('snow')) {
-                    iconContainer.innerHTML = '<div class="cloud"></div>';
-                    addParticles('snow', iconContainer);
-                } else if (fact.condition.includes('thunderstorm')) {
-                    iconContainer.innerHTML = '<div class="cloud"></div><div class="thunder"></div>';
-                }
+                document.querySelector('#weather-icon').src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
             } catch (error) {
                 console.error('Ошибка запроса:', error);
-            }
-        }
-
-        function addParticles(type, container) {
-            for (let i = 0; i < 5; i++) {
-                let particle = document.createElement('div');
-                particle.className = type;
-                particle.style.left = `${Math.random() * 40}px`;
-                particle.style.animationDelay = `${Math.random()}s`;
-                container.appendChild(particle);
             }
         }
 
