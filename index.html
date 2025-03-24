@@ -15,119 +15,52 @@
             align-items: center; justify-content: space-evenly;
             text-align: center;
         }
-        .weather-icon {
-            position: relative;
-            width: 60px; height: 60px;
-        }
+        .weather-icon { position: relative; width: 60px; height: 60px; }
 
-        /* Облако */
+        /* Общие стили для облака */
         .cloud {
-            position: absolute;
-            width: 60px; height: 35px;
-            background: lightgray;
-            border-radius: 20px;
+            position: absolute; width: 60px; height: 35px;
+            background: lightgray; border-radius: 20px;
             animation: cloud-move 5s linear infinite;
         }
         .cloud::before, .cloud::after {
-            content: "";
-            position: absolute;
-            background: lightgray;
-            border-radius: 50%;
+            content: ""; position: absolute; background: lightgray; border-radius: 50%;
         }
-        .cloud::before {
-            width: 28px; height: 28px;
-            top: -10px; left: 5px;
-        }
-        .cloud::after {
-            width: 35px; height: 35px;
-            top: -15px; right: 5px;
-        }
+        .cloud::before { width: 28px; height: 28px; top: -10px; left: 5px; }
+        .cloud::after { width: 35px; height: 35px; top: -15px; right: 5px; }
 
-        /* Анимация облаков */
-        @keyframes cloud-move {
-            0% { transform: translateX(10px); }
-            100% { transform: translateX(-10px); }
-        }
+        @keyframes cloud-move { 0% { transform: translateX(10px); } 100% { transform: translateX(-10px); } }
 
-        /* Анимация солнца */
-        .sun {
-            width: 30px; height: 30px;
-            background: yellow;
-            border-radius: 50%;
-            position: relative;
-        }
+        /* Солнце */
+        .sun { width: 30px; height: 30px; background: yellow; border-radius: 50%; position: relative; }
         .sun-rays {
-            position: absolute;
-            width: 50px; height: 50px;
-            top: -10px; left: -10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute; width: 50px; height: 50px; top: -10px; left: -10px;
+            display: flex; justify-content: center; align-items: center;
             animation: rotate 5s linear infinite;
         }
         .ray {
-            position: absolute;
-            width: 4px; height: 12px;
-            background: yellow;
-            border-radius: 2px;
+            position: absolute; width: 4px; height: 12px; background: yellow; border-radius: 2px;
+            transform-origin: center;
         }
-        .ray:nth-child(1) { transform: rotate(0deg) translate(20px); }
-        .ray:nth-child(2) { transform: rotate(45deg) translate(20px); }
-        .ray:nth-child(3) { transform: rotate(90deg) translate(20px); }
-        .ray:nth-child(4) { transform: rotate(135deg) translate(20px); }
-        .ray:nth-child(5) { transform: rotate(180deg) translate(20px); }
-        .ray:nth-child(6) { transform: rotate(225deg) translate(20px); }
-        .ray:nth-child(7) { transform: rotate(270deg) translate(20px); }
-        .ray:nth-child(8) { transform: rotate(315deg) translate(20px); }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Дождь */
+        /* Дождь и снег */
         .rain, .snow {
-            position: absolute;
-            width: 50px; height: 30px;
-            top: 30px; left: 10px;
+            position: absolute; width: 50px; height: 30px; top: 30px; left: 10px;
         }
         .drop, .flake {
-            position: absolute;
-            width: 4px;
-            height: 10px;
-            background: lightblue;
-            border-radius: 2px;
-            animation: fall 1s linear infinite;
+            position: absolute; width: 4px; height: 10px; background: lightblue;
+            border-radius: 2px; animation: fall 1s linear infinite;
         }
-        .flake {
-            background: white;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(0px); opacity: 1; }
-            100% { transform: translateY(20px); opacity: 0; }
-        }
+        .flake { background: white; width: 6px; height: 6px; border-radius: 50%; }
+        @keyframes fall { 0% { transform: translateY(0px); opacity: 1; } 100% { transform: translateY(20px); opacity: 0; } }
 
         /* Молния */
         .lightning {
-            position: absolute;
-            width: 3px;
-            height: 20px;
-            background: yellow;
-            top: 20px;
-            left: 25px;
-            display: none;
-            animation: lightning-flash 0.3s infinite;
+            position: absolute; width: 3px; height: 20px; background: yellow;
+            top: 20px; left: 25px; display: none; animation: lightning-flash 0.3s infinite;
         }
-
-        @keyframes lightning-flash {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
+        @keyframes lightning-flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -141,7 +74,7 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=51.1333&lon=128.1536&lang=ru_RU&limit=1';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=53.1466&lon=140.7223&lang=ru_RU&limit=1';
 
         async function getWeather() {
             try {
@@ -158,39 +91,31 @@
                 if (fact.condition === 'clear') {
                     iconContainer.innerHTML = `<div class="sun"></div>
                         <div class="sun-rays">
-                            <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
-                            <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
+                            ${Array(8).fill('<div class="ray"></div>').join('')}
                         </div>`;
                 } else if (fact.condition.includes('rain')) {
                     iconContainer.innerHTML = `<div class="cloud"></div><div class="rain"></div>`;
-                    const rainContainer = iconContainer.querySelector('.rain');
-                    for (let i = 0; i < 5; i++) {
-                        const drop = document.createElement('div');
-                        drop.className = 'drop';
-                        drop.style.left = `${Math.random() * 40}px`;
-                        drop.style.animationDelay = `${Math.random()}s`;
-                        rainContainer.appendChild(drop);
-                    }
+                    addElements(iconContainer.querySelector('.rain'), 'drop', 5);
                     if (fact.condition.includes('thunderstorm')) {
-                        const lightning = document.createElement('div');
-                        lightning.className = 'lightning';
-                        iconContainer.appendChild(lightning);
-                        lightning.style.display = 'block';
+                        iconContainer.innerHTML += '<div class="lightning"></div>';
+                        iconContainer.querySelector('.lightning').style.display = 'block';
                     }
                 } else if (fact.condition.includes('snow')) {
                     iconContainer.innerHTML = `<div class="cloud"></div><div class="snow"></div>`;
-                    const snowContainer = iconContainer.querySelector('.snow');
-                    for (let i = 0; i < 8; i++) {
-                        const flake = document.createElement('div');
-                        flake.className = 'flake';
-                        flake.style.left = `${Math.random() * 40}px`;
-                        flake.style.animationDelay = `${Math.random()}s`;
-                        snowContainer.appendChild(flake);
-                    }
+                    addElements(iconContainer.querySelector('.snow'), 'flake', 8);
                 }
-
             } catch (error) {
                 console.error('Ошибка запроса:', error);
+            }
+        }
+
+        function addElements(container, className, count) {
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = className;
+                el.style.left = `${Math.random() * 40}px`;
+                el.style.animationDelay = `${Math.random()}s`;
+                container.appendChild(el);
             }
         }
 
