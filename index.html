@@ -26,15 +26,18 @@
             background: radial-gradient(circle, yellow, orange);
             border-radius: 50%;
             position: absolute;
-            animation: rotate-sun 8s linear infinite;
         }
-        .sun::before {
-            content: "";
+        .sun-rays {
             width: 60px; height: 60px;
             position: absolute;
             top: -10px; left: -10px;
+            background: radial-gradient(transparent 40%, yellow 60%);
             border-radius: 50%;
-            box-shadow: 0 0 15px yellow;
+            animation: rotate-rays 5s linear infinite;
+        }
+        @keyframes rotate-rays {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         .rain-drop {
             position: absolute;
@@ -57,10 +60,6 @@
             border-radius: 50%;
             position: absolute;
             animation: move-clouds 4s linear infinite alternate;
-        }
-        @keyframes rotate-sun {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
         @keyframes rain-fall {
             from { transform: translateY(0); opacity: 1; }
@@ -107,6 +106,9 @@
             if (condition === 'clear') {
                 let sun = document.createElement('div');
                 sun.classList.add('sun');
+                let rays = document.createElement('div');
+                rays.classList.add('sun-rays');
+                sun.appendChild(rays);
                 iconContainer.appendChild(sun);
             } else if (condition.includes('rain')) {
                 let cloud = document.createElement('div');
