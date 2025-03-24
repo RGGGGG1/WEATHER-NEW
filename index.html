@@ -35,15 +35,15 @@
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
         const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
 
-        // Анимированные иконки (Lottie JSON)
+        // Исправленные ссылки на Lottie-анимации
         const animatedIcons = {
-            'clear': 'https://assets8.lottiefiles.com/temp/lf20_rpC1Rd.json', // Ясно
-            'partly-cloudy': 'https://assets8.lottiefiles.com/temp/lf20_HflU56.json', // Малооблачно
-            'cloudy': 'https://assets8.lottiefiles.com/temp/lf20_VMrwdu.json', // Облачно
-            'overcast': 'https://assets8.lottiefiles.com/temp/lf20_w51pcehl.json', // Пасмурно
-            'rain': 'https://assets8.lottiefiles.com/temp/lf20_kOfPke.json', // Дождь
-            'snow': 'https://assets8.lottiefiles.com/temp/lf20_r7jwjehu.json', // Снег
-            'thunderstorm': 'https://assets8.lottiefiles.com/temp/lf20_TegYew.json', // Гроза
+            'clear': 'https://lottie.host/8b5754ff-4d5e-4f41-8a6f-b45fd5fc90e4/sbKTjMT3qJ.json', // Ясно
+            'partly-cloudy': 'https://lottie.host/2d1c89f6-5ea2-4e3b-b292-849f9248ef58/N9BxKTTGSY.json', // Малооблачно
+            'cloudy': 'https://lottie.host/0c6a1e0e-2a59-4e72-946e-cc51c3b3c3fc/Ot9N5J84EC.json', // Облачно
+            'overcast': 'https://lottie.host/40e8b503-3b1c-4c04-b15e-06f41e4bbd89/QU8wH81NUm.json', // Пасмурно
+            'rain': 'https://lottie.host/8e7e7f12-5959-46f5-8ee5-8eb5ebbb5c10/Op3PB3V4YF.json', // Дождь
+            'snow': 'https://lottie.host/2e0786f6-d4b6-4a3e-b6e6-9098b7b30266/L4e95oKMCN.json', // Снег
+            'thunderstorm': 'https://lottie.host/34c3c7f2-fc6b-4e8f-9082-1c8cc8b1b68d/OltgyPD4aB.json', // Гроза
         };
 
         const conditionsMap = {
@@ -58,25 +58,31 @@
 
         async function getWeather() {
             try {
+                console.log("Запрос к API...");
+
                 const response = await fetch(apiUrl, { headers: { 'X-Yandex-API-Key': apiKey } });
                 const { fact } = await response.json();
                 if (!fact) throw new Error('Ошибка данных API');
+
+                console.log("Данные получены:", fact);
 
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
 
-                // Добавляем анимированную иконку
+                // Загружаем анимацию
                 const iconContainer = document.querySelector('#weather-icon');
-                iconContainer.innerHTML = ''; // Очищаем перед добавлением новой анимации
-                const animation = animatedIcons[fact.condition] || animatedIcons['clear'];
-                
+                iconContainer.innerHTML = ''; // Очищаем контейнер перед новой анимацией
+
+                const animationUrl = animatedIcons[fact.condition] || animatedIcons['clear'];
+                console.log("Загрузка анимации:", animationUrl);
+
                 lottie.loadAnimation({
                     container: iconContainer,
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    path: animation
+                    path: animationUrl
                 });
 
             } catch (error) {
