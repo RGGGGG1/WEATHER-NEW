@@ -26,14 +26,19 @@
             background: radial-gradient(circle, yellow, orange);
             border-radius: 50%;
             position: absolute;
+            top: 5px; left: 5px;
         }
         .sun-rays {
-            width: 60px; height: 60px;
             position: absolute;
+            width: 60px; height: 60px;
             top: -10px; left: -10px;
-            background: radial-gradient(transparent 40%, yellow 60%);
-            border-radius: 50%;
             animation: rotate-rays 5s linear infinite;
+        }
+        .sun-ray {
+            position: absolute;
+            width: 4px; height: 15px;
+            background: yellow;
+            border-radius: 2px;
         }
         @keyframes rotate-rays {
             from { transform: rotate(0deg); }
@@ -106,9 +111,18 @@
             if (condition === 'clear') {
                 let sun = document.createElement('div');
                 sun.classList.add('sun');
-                let rays = document.createElement('div');
-                rays.classList.add('sun-rays');
-                sun.appendChild(rays);
+                
+                let raysContainer = document.createElement('div');
+                raysContainer.classList.add('sun-rays');
+
+                for (let i = 0; i < 8; i++) {
+                    let ray = document.createElement('div');
+                    ray.classList.add('sun-ray');
+                    ray.style.transform = `rotate(${i * 45}deg) translate(30px)`;
+                    raysContainer.appendChild(ray);
+                }
+
+                iconContainer.appendChild(raysContainer);
                 iconContainer.appendChild(sun);
             } else if (condition.includes('rain')) {
                 let cloud = document.createElement('div');
