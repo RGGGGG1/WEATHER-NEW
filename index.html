@@ -15,14 +15,76 @@
             align-items: center; justify-content: space-evenly;
             text-align: center;
         }
-        .weather-icon img { width: 50px; height: 50px; }
+        .weather-icon {
+            position: relative;
+            width: 50px; height: 50px;
+        }
+        .weather-icon img {
+            width: 100%; height: 100%;
+        }
         .temperature { font-size: 18px; font-weight: bold; }
         .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+        /* Анимация солнца */
+        .sun {
+            position: relative;
+            width: 50px; height: 50px;
+            background: yellow;
+            border-radius: 50%;
+            animation: sun-rotate 5s linear infinite;
+        }
+        .sun::before {
+            content: "";
+            position: absolute;
+            width: 70px; height: 70px;
+            left: -10px; top: -10px;
+            background: radial-gradient(circle, rgba(255,255,0,0.5) 10%, rgba(255,255,0,0) 60%);
+            border-radius: 50%;
+        }
+        @keyframes sun-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Анимация дождя */
+        .rain {
+            position: relative;
+            width: 50px; height: 50px;
+        }
+        .rain::before {
+            content: "💧 💧 💧";
+            position: absolute;
+            top: 10px; left: 0;
+            width: 100%;
+            animation: rain-fall 1s linear infinite;
+        }
+        @keyframes rain-fall {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+
+        /* Анимация снега */
+        .snow {
+            position: relative;
+            width: 50px; height: 50px;
+        }
+        .snow::before {
+            content: "❄ ❄ ❄";
+            position: absolute;
+            top: 5px; left: 0;
+            width: 100%;
+            animation: snow-fall 2s linear infinite;
+        }
+        @keyframes snow-fall {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+
     </style>
 </head>
 <body>
     <div class="weather-widget">
-        <div class="weather-icon"><img id="weather-icon" src="" alt="Иконка погоды"></div>
+        <div class="weather-icon" id="weather-icon"></div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -51,7 +113,20 @@
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
-                document.querySelector('#weather-icon').src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
+
+                const iconContainer = document.querySelector('#weather-icon');
+                iconContainer.innerHTML = '';
+
+                if (fact.condition === 'clear') {
+                    iconContainer.innerHTML = '<div class="sun"></div>';
+                } else if (fact.condition.includes('rain')) {
+                    iconContainer.innerHTML = '<div class="rain">☁</div>';
+                } else if (fact.condition.includes('snow')) {
+                    iconContainer.innerHTML = '<div class="snow">☁</div>';
+                } else {
+                    iconContainer.innerHTML = '<img src="https://yastatic.net/weather/i/icons/funky/dark/' + fact.icon + '.svg">';
+                }
+
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
