@@ -15,39 +15,48 @@
             align-items: center; justify-content: space-evenly;
             text-align: center;
             position: relative;
+            overflow: hidden;
         }
         .weather-icon {
             width: 50px; height: 50px;
             position: relative;
         }
         .sun {
-            width: 50px; height: 50px;
+            width: 40px; height: 40px;
             background: radial-gradient(circle, yellow, orange);
             border-radius: 50%;
             position: absolute;
-            animation: rotate-sun 5s linear infinite;
+            animation: rotate-sun 8s linear infinite;
         }
-        .rain {
+        .sun::before {
+            content: "";
+            width: 60px; height: 60px;
+            position: absolute;
+            top: -10px; left: -10px;
+            border-radius: 50%;
+            box-shadow: 0 0 15px yellow;
+        }
+        .rain-drop {
             position: absolute;
             width: 2px; height: 10px;
             background: lightblue;
             top: 50%; left: 50%;
             animation: rain-fall 0.5s linear infinite;
         }
-        .snow {
+        .snowflake {
             position: absolute;
             width: 5px; height: 5px;
             background: white;
             border-radius: 50%;
             top: 50%; left: 50%;
-            animation: snow-fall 1s linear infinite;
+            animation: snow-fall 2s linear infinite;
         }
         .cloud {
-            width: 50px; height: 30px;
+            width: 60px; height: 30px;
             background: lightgray;
             border-radius: 50%;
             position: absolute;
-            animation: move-clouds 3s linear infinite alternate;
+            animation: move-clouds 4s linear infinite alternate;
         }
         @keyframes rotate-sun {
             from { transform: rotate(0deg); }
@@ -59,7 +68,7 @@
         }
         @keyframes snow-fall {
             from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(15px); opacity: 0; }
         }
         @keyframes move-clouds {
             from { transform: translateX(-5px); }
@@ -105,7 +114,7 @@
                 iconContainer.appendChild(cloud);
                 for (let i = 0; i < 5; i++) {
                     let drop = document.createElement('div');
-                    drop.classList.add('rain');
+                    drop.classList.add('rain-drop');
                     drop.style.left = `${Math.random() * 40}px`;
                     drop.style.animationDelay = `${Math.random()}s`;
                     iconContainer.appendChild(drop);
@@ -116,7 +125,7 @@
                 iconContainer.appendChild(cloud);
                 for (let i = 0; i < 5; i++) {
                     let snowflake = document.createElement('div');
-                    snowflake.classList.add('snow');
+                    snowflake.classList.add('snowflake');
                     snowflake.style.left = `${Math.random() * 40}px`;
                     snowflake.style.animationDelay = `${Math.random()}s`;
                     iconContainer.appendChild(snowflake);
