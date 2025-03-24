@@ -15,58 +15,34 @@
             align-items: center; justify-content: space-evenly;
             text-align: center;
         }
-        .weather-icon {
-            width: 50px; height: 50px; 
-            position: relative;
+        .weather-icon img { 
+            width: 50px; height: 50px;
         }
-        .weather-icon img { width: 100%; height: 100%; }
+        .temperature { font-size: 18px; font-weight: bold; }
+        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 
-        /* Анимация солнца */
-        .sun { animation: spin 5s linear infinite; }
-
-        @keyframes spin {
+        /* Анимации иконок */
+        @keyframes sun-rays {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Анимация дождя */
-        .rain::after {
-            content: "💧 💧 💧";
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translateX(-50%);
-            animation: rain-fall 1s infinite linear;
-        }
-
         @keyframes rain-fall {
-            0% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
-            100% { transform: translateX(-50%) translateY(10px); opacity: 0; }
+            0% { transform: translateY(-5px); opacity: 1; }
+            100% { transform: translateY(5px); opacity: 0.5; }
         }
-
-        /* Анимация снега */
-        .snow::after {
-            content: "❄️ ❄️ ❄️";
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translateX(-50%);
-            animation: snow-fall 2s infinite ease-in-out;
-        }
-
         @keyframes snow-fall {
-            0% { transform: translateX(-50%) translateY(-10px); opacity: 1; }
-            100% { transform: translateX(-50%) translateY(10px); opacity: 0; }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
         }
-
-        /* Анимация облаков */
-        .cloud { animation: move-clouds 3s infinite alternate ease-in-out; }
-
-        @keyframes move-clouds {
-            0% { transform: translateX(0); }
+        @keyframes clouds-move {
+            0% { transform: translateX(-5px); }
             100% { transform: translateX(5px); }
         }
 
-        .temperature { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .sun img { animation: sun-rays 10s linear infinite; }
+        .rain img { animation: rain-fall 1s ease-in-out infinite alternate; }
+        .snow img { animation: snow-fall 2s ease-in-out infinite alternate; }
+        .clouds img { animation: clouds-move 3s ease-in-out infinite alternate; }
     </style>
 </head>
 <body>
@@ -80,15 +56,27 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=56.0184&lon=92.8672&lang=ru_RU&limit=1';
 
         const conditionsMap = {
-            'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
-            'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
-            'heavy-rain': 'Сильный дождь', 'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень',
-            'wet-snow': 'Дождь со снегом', 'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
-            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
-            'thunderstorm-with-hail': 'Гроза с градом'
+            'clear': { text: 'Ясно', class: 'sun' },
+            'partly-cloudy': { text: 'Малооблачно', class: 'clouds' },
+            'cloudy': { text: 'Облачно', class: 'clouds' },
+            'overcast': { text: 'Пасмурно', class: 'clouds' },
+            'drizzle': { text: 'Морось', class: 'rain' },
+            'light-rain': { text: 'Небольшой дождь', class: 'rain' },
+            'rain': { text: 'Дождь', class: 'rain' },
+            'moderate-rain': { text: 'Умеренный дождь', class: 'rain' },
+            'heavy-rain': { text: 'Сильный дождь', class: 'rain' },
+            'showers': { text: 'Ливень', class: 'rain' },
+            'wet-snow': { text: 'Дождь со снегом', class: 'snow' },
+            'light-snow': { text: 'Небольшой снег', class: 'snow' },
+            'snow': { text: 'Снег', class: 'snow' },
+            'snow-showers': { text: 'Снегопад', class: 'snow' },
+            'hail': { text: 'Град', class: 'snow' },
+            'thunderstorm': { text: 'Гроза', class: 'rain' },
+            'thunderstorm-with-rain': { text: 'Гроза с дождем', class: 'rain' },
+            'thunderstorm-with-hail': { text: 'Гроза с градом', class: 'snow' }
         };
 
         async function getWeather() {
@@ -99,20 +87,15 @@
 
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
-                document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
-                const icon = document.querySelector('#weather-icon');
 
-                // Устанавливаем иконку
+                const condition = conditionsMap[fact.condition] || { text: 'Неизвестно', class: '' };
+                document.querySelector('#weather-condition').textContent = condition.text;
+
+                const icon = document.querySelector('#weather-icon');
                 icon.src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
 
-                // Убираем старые классы
-                icon.classList.remove('sun', 'rain', 'snow', 'cloud');
-
-                // Добавляем нужный класс анимации
-                if (fact.condition === 'clear') icon.classList.add('sun');
-                else if (fact.condition.includes('rain')) icon.classList.add('rain');
-                else if (fact.condition.includes('snow')) icon.classList.add('snow');
-                else if (fact.condition.includes('cloud')) icon.classList.add('cloud');
+                const weatherIconDiv = document.querySelector('.weather-icon');
+                weatherIconDiv.className = `weather-icon ${condition.class}`;
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
