@@ -17,17 +17,16 @@
         }
         .weather-icon {
             position: relative;
-            width: 50px; height: 50px;
+            width: 60px; height: 60px;
         }
 
-        /* Детализированное облако */
+        /* Облако */
         .cloud {
             position: absolute;
-            top: 5px;
-            width: 55px;
-            height: 30px;
+            width: 60px; height: 35px;
             background: lightgray;
             border-radius: 20px;
+            animation: cloud-move 5s linear infinite;
         }
         .cloud::before, .cloud::after {
             content: "";
@@ -36,30 +35,30 @@
             border-radius: 50%;
         }
         .cloud::before {
-            width: 25px;
-            height: 25px;
-            top: -10px;
-            left: 5px;
+            width: 28px; height: 28px;
+            top: -10px; left: 5px;
         }
         .cloud::after {
-            width: 30px;
-            height: 30px;
-            top: -15px;
-            right: 5px;
+            width: 35px; height: 35px;
+            top: -15px; right: 5px;
+        }
+
+        /* Анимация облаков */
+        @keyframes cloud-move {
+            0% { transform: translateX(10px); }
+            100% { transform: translateX(-10px); }
         }
 
         /* Анимация солнца */
         .sun {
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             background: yellow;
             border-radius: 50%;
             position: relative;
         }
         .sun-rays {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             top: -10px; left: -10px;
             display: flex;
             justify-content: center;
@@ -68,8 +67,7 @@
         }
         .ray {
             position: absolute;
-            width: 4px;
-            height: 12px;
+            width: 4px; height: 12px;
             background: yellow;
             border-radius: 2px;
         }
@@ -88,39 +86,46 @@
         }
 
         /* Дождь */
-        .rain {
+        .rain, .snow {
             position: absolute;
             width: 50px; height: 30px;
             top: 30px; left: 10px;
         }
-        .drop {
-            width: 3px;
+        .drop, .flake {
+            position: absolute;
+            width: 4px;
             height: 10px;
             background: lightblue;
-            position: absolute;
-            top: 0;
-            animation: rain-fall 1s linear infinite;
+            border-radius: 2px;
+            animation: fall 1s linear infinite;
         }
-        @keyframes rain-fall {
+        .flake {
+            background: white;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        @keyframes fall {
             0% { transform: translateY(0px); opacity: 1; }
             100% { transform: translateY(20px); opacity: 0; }
         }
 
-        /* Снег */
-        .snow {
+        /* Молния */
+        .lightning {
             position: absolute;
-            width: 50px; height: 30px;
-            top: 30px; left: 10px;
+            width: 3px;
+            height: 20px;
+            background: yellow;
+            top: 20px;
+            left: 25px;
+            display: none;
+            animation: lightning-flash 0.3s infinite;
         }
-        .flake {
-            position: absolute;
-            font-size: 12px;
-            color: white;
-            animation: snow-fall 2s linear infinite;
-        }
-        @keyframes snow-fall {
-            0% { transform: translateY(0px); opacity: 1; }
-            100% { transform: translateY(20px); opacity: 0; }
+
+        @keyframes lightning-flash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
 
     </style>
@@ -136,16 +141,7 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=52.4669&lon=130.9947&lang=ru_RU&limit=1';
-
-        const conditionsMap = {
-            'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
-            'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
-            'heavy-rain': 'Сильный дождь', 'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень',
-            'wet-snow': 'Дождь со снегом', 'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
-            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
-            'thunderstorm-with-hail': 'Гроза с градом'
-        };
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=51.1333&lon=128.1536&lang=ru_RU&limit=1';
 
         async function getWeather() {
             try {
@@ -155,7 +151,6 @@
 
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
-                document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
 
                 const iconContainer = document.querySelector('#weather-icon');
                 iconContainer.innerHTML = '';
@@ -175,6 +170,22 @@
                         drop.style.left = `${Math.random() * 40}px`;
                         drop.style.animationDelay = `${Math.random()}s`;
                         rainContainer.appendChild(drop);
+                    }
+                    if (fact.condition.includes('thunderstorm')) {
+                        const lightning = document.createElement('div');
+                        lightning.className = 'lightning';
+                        iconContainer.appendChild(lightning);
+                        lightning.style.display = 'block';
+                    }
+                } else if (fact.condition.includes('snow')) {
+                    iconContainer.innerHTML = `<div class="cloud"></div><div class="snow"></div>`;
+                    const snowContainer = iconContainer.querySelector('.snow');
+                    for (let i = 0; i < 8; i++) {
+                        const flake = document.createElement('div');
+                        flake.className = 'flake';
+                        flake.style.left = `${Math.random() * 40}px`;
+                        flake.style.animationDelay = `${Math.random()}s`;
+                        snowContainer.appendChild(flake);
                     }
                 }
 
