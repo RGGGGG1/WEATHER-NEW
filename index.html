@@ -2,28 +2,27 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=120, height=120, initial-scale=1.0">
+    <meta name="viewport" content="width=120, initial-scale=1.0">
     <title>Виджет погоды</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 120px; height: 120px; background: #000; color: #fff; overflow: hidden; }
+        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .weather-widget {
-            width: 100%; height: 100%;
+            width: 120px; height: 120px;
+            background: #000; color: #fff;
             font-family: Arial, sans-serif;
             display: flex; flex-direction: column;
             align-items: center; justify-content: space-evenly;
             text-align: center;
         }
-        .weather-icon { width: 50px; height: 50px; } /* Анимированная иконка */
-        .temperature { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .temperature { font-size: 20px; font-weight: bold; }
+        .details { font-size: 14px; }
+        canvas { width: 60px; height: 60px; }
     </style>
 </head>
 <body>
-
     <div class="weather-widget">
-        <div class="weather-icon" id="weather-icon"></div> 
+        <canvas id="weatherCanvas"></canvas>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -35,64 +34,96 @@
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
         const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
 
-        // Исправленные ссылки на Lottie-анимации
-        const animatedIcons = {
-            'clear': 'https://lottie.host/8b5754ff-4d5e-4f41-8a6f-b45fd5fc90e4/sbKTjMT3qJ.json', // Ясно
-            'partly-cloudy': 'https://lottie.host/2d1c89f6-5ea2-4e3b-b292-849f9248ef58/N9BxKTTGSY.json', // Малооблачно
-            'cloudy': 'https://lottie.host/0c6a1e0e-2a59-4e72-946e-cc51c3b3c3fc/Ot9N5J84EC.json', // Облачно
-            'overcast': 'https://lottie.host/40e8b503-3b1c-4c04-b15e-06f41e4bbd89/QU8wH81NUm.json', // Пасмурно
-            'rain': 'https://lottie.host/8e7e7f12-5959-46f5-8ee5-8eb5ebbb5c10/Op3PB3V4YF.json', // Дождь
-            'snow': 'https://lottie.host/2e0786f6-d4b6-4a3e-b6e6-9098b7b30266/L4e95oKMCN.json', // Снег
-            'thunderstorm': 'https://lottie.host/34c3c7f2-fc6b-4e8f-9082-1c8cc8b1b68d/OltgyPD4aB.json', // Гроза
-        };
-
         const conditionsMap = {
-            'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно',
-            'overcast': 'Пасмурно', 'drizzle': 'Морось', 'light-rain': 'Небольшой дождь',
-            'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь', 'heavy-rain': 'Сильный дождь',
-            'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень', 'wet-snow': 'Дождь со снегом',
-            'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
-            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
-            'thunderstorm-with-hail': 'Гроза с градом'
+            'clear': 'Ясно',
+            'partly-cloudy': 'Малооблачно',
+            'cloudy': 'Облачно',
+            'overcast': 'Пасмурно',
+            'light-rain': 'Небольшой дождь',
+            'rain': 'Дождь',
+            'snow': 'Снег'
         };
 
         async function getWeather() {
             try {
-                console.log("Запрос к API...");
-
                 const response = await fetch(apiUrl, { headers: { 'X-Yandex-API-Key': apiKey } });
                 const { fact } = await response.json();
                 if (!fact) throw new Error('Ошибка данных API');
 
-                console.log("Данные получены:", fact);
-
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
-
-                // Загружаем анимацию
-                const iconContainer = document.querySelector('#weather-icon');
-                iconContainer.innerHTML = ''; // Очищаем контейнер перед новой анимацией
-
-                const animationUrl = animatedIcons[fact.condition] || animatedIcons['clear'];
-                console.log("Загрузка анимации:", animationUrl);
-
-                lottie.loadAnimation({
-                    container: iconContainer,
-                    renderer: 'svg',
-                    loop: true,
-                    autoplay: true,
-                    path: animationUrl
-                });
-
+                animateWeather(fact.condition);
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
         }
 
+        function animateWeather(condition) {
+            const canvas = document.getElementById('weatherCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 60;
+            canvas.height = 60;
+            
+            function drawSun() {
+                let angle = 0;
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'yellow';
+                    ctx.beginPath();
+                    ctx.arc(30, 30, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.save();
+                    ctx.translate(30, 30);
+                    ctx.rotate(angle);
+                    ctx.restore();
+                    angle += 0.05;
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+            
+            function drawRain() {
+                let drops = Array.from({ length: 10 }, () => ({ x: Math.random() * 60, y: Math.random() * 60 }));
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'blue';
+                    drops.forEach(drop => {
+                        ctx.fillRect(drop.x, drop.y, 2, 5);
+                        drop.y += 2;
+                        if (drop.y > 60) drop.y = 0;
+                    });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+            
+            function drawSnow() {
+                let flakes = Array.from({ length: 10 }, () => ({ x: Math.random() * 60, y: Math.random() * 60 }));
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'white';
+                    flakes.forEach(flake => {
+                        ctx.beginPath();
+                        ctx.arc(flake.x, flake.y, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        flake.y += 1;
+                        if (flake.y > 60) flake.y = 0;
+                    });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (condition.includes('clear')) drawSun();
+            else if (condition.includes('rain')) drawRain();
+            else if (condition.includes('snow')) drawSnow();
+        }
+
         getWeather();
         setInterval(getWeather, 600000);
     </script>
-
 </body>
 </html>
