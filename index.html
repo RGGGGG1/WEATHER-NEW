@@ -19,26 +19,22 @@
             position: relative;
             width: 50px; height: 50px;
         }
-        .weather-icon img {
-            width: 100%; height: 100%;
-        }
-        .temperature { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 
-        /* Анимация солнца */
+        /* Солнце */
         .sun {
-            position: relative;
-            width: 50px; height: 50px;
+            width: 40px;
+            height: 40px;
             background: yellow;
             border-radius: 50%;
+            position: relative;
             animation: sun-rotate 5s linear infinite;
         }
         .sun::before {
             content: "";
             position: absolute;
-            width: 70px; height: 70px;
+            width: 60px; height: 60px;
             left: -10px; top: -10px;
-            background: radial-gradient(circle, rgba(255,255,0,0.5) 10%, rgba(255,255,0,0) 60%);
+            background: radial-gradient(circle, rgba(255,255,0,0.5) 20%, rgba(255,255,0,0) 70%);
             border-radius: 50%;
         }
         @keyframes sun-rotate {
@@ -46,37 +42,40 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Анимация дождя */
+        /* Дождь */
         .rain {
             position: relative;
             width: 50px; height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .rain::before {
-            content: "💧 💧 💧";
+        .drop {
+            width: 3px;
+            height: 10px;
+            background: lightblue;
             position: absolute;
-            top: 10px; left: 0;
-            width: 100%;
+            top: 0;
             animation: rain-fall 1s linear infinite;
         }
         @keyframes rain-fall {
-            0% { transform: translateY(0); opacity: 1; }
+            0% { transform: translateY(0px); opacity: 1; }
             100% { transform: translateY(20px); opacity: 0; }
         }
 
-        /* Анимация снега */
+        /* Снег */
         .snow {
             position: relative;
             width: 50px; height: 50px;
         }
-        .snow::before {
-            content: "❄ ❄ ❄";
+        .flake {
             position: absolute;
-            top: 5px; left: 0;
-            width: 100%;
+            font-size: 12px;
+            color: white;
             animation: snow-fall 2s linear infinite;
         }
         @keyframes snow-fall {
-            0% { transform: translateY(0); opacity: 1; }
+            0% { transform: translateY(0px); opacity: 1; }
             100% { transform: translateY(20px); opacity: 0; }
         }
 
@@ -120,9 +119,28 @@
                 if (fact.condition === 'clear') {
                     iconContainer.innerHTML = '<div class="sun"></div>';
                 } else if (fact.condition.includes('rain')) {
-                    iconContainer.innerHTML = '<div class="rain">☁</div>';
+                    const rainContainer = document.createElement('div');
+                    rainContainer.className = 'rain';
+                    for (let i = 0; i < 5; i++) {
+                        const drop = document.createElement('div');
+                        drop.className = 'drop';
+                        drop.style.left = `${Math.random() * 40}px`;
+                        drop.style.animationDelay = `${Math.random()}s`;
+                        rainContainer.appendChild(drop);
+                    }
+                    iconContainer.appendChild(rainContainer);
                 } else if (fact.condition.includes('snow')) {
-                    iconContainer.innerHTML = '<div class="snow">☁</div>';
+                    const snowContainer = document.createElement('div');
+                    snowContainer.className = 'snow';
+                    for (let i = 0; i < 5; i++) {
+                        const flake = document.createElement('div');
+                        flake.className = 'flake';
+                        flake.textContent = '❄';
+                        flake.style.left = `${Math.random() * 40}px`;
+                        flake.style.animationDelay = `${Math.random()}s`;
+                        snowContainer.appendChild(flake);
+                    }
+                    iconContainer.appendChild(snowContainer);
                 } else {
                     iconContainer.innerHTML = '<img src="https://yastatic.net/weather/i/icons/funky/dark/' + fact.icon + '.svg">';
                 }
