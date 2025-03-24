@@ -20,24 +20,41 @@
             width: 50px; height: 50px;
         }
 
-        /* Солнце */
+        /* Анимация солнца */
         .sun {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             background: yellow;
             border-radius: 50%;
             position: relative;
-            animation: sun-rotate 5s linear infinite;
         }
-        .sun::before {
-            content: "";
+        .sun-rays {
             position: absolute;
-            width: 60px; height: 60px;
-            left: -10px; top: -10px;
-            background: radial-gradient(circle, rgba(255,255,0,0.5) 20%, rgba(255,255,0,0) 70%);
-            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            top: -10px; left: -10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: rotate 5s linear infinite;
         }
-        @keyframes sun-rotate {
+        .ray {
+            position: absolute;
+            width: 4px;
+            height: 12px;
+            background: yellow;
+            border-radius: 2px;
+        }
+        .ray:nth-child(1) { transform: rotate(0deg) translate(20px); }
+        .ray:nth-child(2) { transform: rotate(45deg) translate(20px); }
+        .ray:nth-child(3) { transform: rotate(90deg) translate(20px); }
+        .ray:nth-child(4) { transform: rotate(135deg) translate(20px); }
+        .ray:nth-child(5) { transform: rotate(180deg) translate(20px); }
+        .ray:nth-child(6) { transform: rotate(225deg) translate(20px); }
+        .ray:nth-child(7) { transform: rotate(270deg) translate(20px); }
+        .ray:nth-child(8) { transform: rotate(315deg) translate(20px); }
+
+        @keyframes rotate {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
@@ -46,9 +63,6 @@
         .rain {
             position: relative;
             width: 50px; height: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .drop {
             width: 3px;
@@ -92,7 +106,7 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=55.0084&lon=82.9357&lang=ru_RU&limit=1';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=53.9006&lon=27.5590&lang=ru_RU&limit=1';
 
         const conditionsMap = {
             'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
@@ -117,7 +131,11 @@
                 iconContainer.innerHTML = '';
 
                 if (fact.condition === 'clear') {
-                    iconContainer.innerHTML = '<div class="sun"></div>';
+                    iconContainer.innerHTML = `<div class="sun"></div>
+                        <div class="sun-rays">
+                            <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
+                            <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
+                        </div>`;
                 } else if (fact.condition.includes('rain')) {
                     const rainContainer = document.createElement('div');
                     rainContainer.className = 'rain';
@@ -141,8 +159,6 @@
                         snowContainer.appendChild(flake);
                     }
                     iconContainer.appendChild(snowContainer);
-                } else {
-                    iconContainer.innerHTML = '<img src="https://yastatic.net/weather/i/icons/funky/dark/' + fact.icon + '.svg">';
                 }
 
             } catch (error) {
