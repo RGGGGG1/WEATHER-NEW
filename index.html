@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=120, height=120, initial-scale=1.0">
     <title>Виджет погоды</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 120px; height: 120px; background: #000; color: #fff; overflow: hidden; }
@@ -14,15 +15,15 @@
             align-items: center; justify-content: space-evenly;
             text-align: center;
         }
-        .weather-icon img { width: 50px; height: 50px; } /* Увеличил размер иконки */
-        .temperature { font-size: 18px; font-weight: bold; } /* Увеличил текст температуры */
-        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 2px; } /* Увеличил общий размер текста */
+        .weather-icon { width: 50px; height: 50px; } /* Анимированная иконка */
+        .temperature { font-size: 18px; font-weight: bold; }
+        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
     </style>
 </head>
 <body>
 
     <div class="weather-widget">
-        <div class="weather-icon"><img id="weather-icon" src="" alt="Иконка погоды"></div>
+        <div class="weather-icon" id="weather-icon"></div> 
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -33,6 +34,17 @@
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
         const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=54.7065&lon=20.5106&lang=ru_RU&limit=1';
+
+        // Анимированные иконки (Lottie JSON)
+        const animatedIcons = {
+            'clear': 'https://assets8.lottiefiles.com/temp/lf20_rpC1Rd.json', // Ясно
+            'partly-cloudy': 'https://assets8.lottiefiles.com/temp/lf20_HflU56.json', // Малооблачно
+            'cloudy': 'https://assets8.lottiefiles.com/temp/lf20_VMrwdu.json', // Облачно
+            'overcast': 'https://assets8.lottiefiles.com/temp/lf20_w51pcehl.json', // Пасмурно
+            'rain': 'https://assets8.lottiefiles.com/temp/lf20_kOfPke.json', // Дождь
+            'snow': 'https://assets8.lottiefiles.com/temp/lf20_r7jwjehu.json', // Снег
+            'thunderstorm': 'https://assets8.lottiefiles.com/temp/lf20_TegYew.json', // Гроза
+        };
 
         const conditionsMap = {
             'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно',
@@ -53,7 +65,20 @@
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
-                document.querySelector('#weather-icon').src = `https://yastatic.net/weather/i/icons/funky/dark/${fact.icon}.svg`;
+
+                // Добавляем анимированную иконку
+                const iconContainer = document.querySelector('#weather-icon');
+                iconContainer.innerHTML = ''; // Очищаем перед добавлением новой анимации
+                const animation = animatedIcons[fact.condition] || animatedIcons['clear'];
+                
+                lottie.loadAnimation({
+                    container: iconContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: animation
+                });
+
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
