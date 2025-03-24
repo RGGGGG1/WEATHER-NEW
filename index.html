@@ -96,22 +96,26 @@
                 const iconContainer = document.querySelector('#weather-icon');
                 iconContainer.innerHTML = '';
 
+                let iconHtml = '';
+
                 if (fact.condition === 'clear') {
-                    iconContainer.innerHTML = `<div class="sun"></div>
+                    iconHtml = `<div class="sun"></div>
                         <div class="sun-rays">
                             ${Array(8).fill('<div class="ray"></div>').join('')}
                         </div>`;
                 } else if (fact.condition.includes('rain')) {
-                    iconContainer.innerHTML = `<div class="cloud"></div><div class="rain"></div>`;
-                    addElements(iconContainer.querySelector('.rain'), 'drop', 5);
+                    iconHtml = `<div class="cloud"></div><div class="rain"></div>`;
+                    addElements(iconContainer, 'drop', 5);
                     if (fact.condition.includes('thunderstorm')) {
-                        iconContainer.innerHTML += '<div class="lightning"></div>';
-                        iconContainer.querySelector('.lightning').style.display = 'block';
+                        iconHtml += '<div class="lightning"></div>';
                     }
                 } else if (fact.condition.includes('snow')) {
-                    iconContainer.innerHTML = `<div class="cloud"></div><div class="snow"></div>`;
-                    addElements(iconContainer.querySelector('.snow'), 'flake', 8, '❄');
+                    iconHtml = `<div class="cloud"></div><div class="snow"></div>`;
+                    addElements(iconContainer, 'flake', 8, '❄');
                 }
+
+                iconContainer.innerHTML = iconHtml;
+
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
