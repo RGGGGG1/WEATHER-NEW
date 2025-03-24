@@ -17,7 +17,7 @@
         }
         .weather-icon { position: relative; width: 60px; height: 60px; }
 
-        /* Общие стили для облака */
+        /* Облако */
         .cloud {
             position: absolute; width: 60px; height: 35px;
             background: lightgray; border-radius: 20px;
@@ -44,16 +44,24 @@
         }
         @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Дождь и снег */
-        .rain, .snow {
+        /* Дождь */
+        .rain {
             position: absolute; width: 50px; height: 30px; top: 30px; left: 10px;
         }
-        .drop, .flake {
+        .drop {
             position: absolute; width: 4px; height: 10px; background: lightblue;
             border-radius: 2px; animation: fall 1s linear infinite;
         }
-        .flake { background: white; width: 6px; height: 6px; border-radius: 50%; }
         @keyframes fall { 0% { transform: translateY(0px); opacity: 1; } 100% { transform: translateY(20px); opacity: 0; } }
+
+        /* Снежинки */
+        .snow {
+            position: absolute; width: 50px; height: 30px; top: 30px; left: 10px;
+        }
+        .flake {
+            position: absolute; font-size: 12px; color: white;
+            animation: fall 2s linear infinite;
+        }
 
         /* Молния */
         .lightning {
@@ -74,7 +82,7 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=53.1466&lon=140.7223&lang=ru_RU&limit=1';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=53.1465&lon=140.7103&lang=ru_RU&limit=1'; // Координаты Николаевска-на-Амуре
 
         async function getWeather() {
             try {
@@ -102,19 +110,20 @@
                     }
                 } else if (fact.condition.includes('snow')) {
                     iconContainer.innerHTML = `<div class="cloud"></div><div class="snow"></div>`;
-                    addElements(iconContainer.querySelector('.snow'), 'flake', 8);
+                    addElements(iconContainer.querySelector('.snow'), 'flake', 8, '❄');
                 }
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
         }
 
-        function addElements(container, className, count) {
+        function addElements(container, className, count, content = '') {
             for (let i = 0; i < count; i++) {
                 const el = document.createElement('div');
                 el.className = className;
                 el.style.left = `${Math.random() * 40}px`;
                 el.style.animationDelay = `${Math.random()}s`;
+                if (content) el.innerHTML = content;
                 container.appendChild(el);
             }
         }
