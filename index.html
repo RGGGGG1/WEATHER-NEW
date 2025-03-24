@@ -14,69 +14,27 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: space-evenly;
             text-align: center;
-            position: relative;
-            overflow: hidden;
         }
         .weather-icon {
-            width: 50px; height: 50px;
             position: relative;
+            width: 50px; height: 50px;
         }
         .sun {
-            width: 40px; height: 40px;
-            background: radial-gradient(circle, yellow, orange);
-            border-radius: 50%;
             position: absolute;
-            top: 5px; left: 5px;
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
         }
         .sun-rays {
             position: absolute;
-            width: 60px; height: 60px;
+            width: 70px; height: 70px;
+            background: url('/mnt/data/солнце3.png') no-repeat center/contain;
             top: -10px; left: -10px;
             animation: rotate-rays 5s linear infinite;
-        }
-        .sun-ray {
-            position: absolute;
-            width: 4px; height: 15px;
-            background: yellow;
-            border-radius: 2px;
         }
         @keyframes rotate-rays {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
-        }
-        .rain-drop {
-            position: absolute;
-            width: 2px; height: 10px;
-            background: lightblue;
-            top: 50%; left: 50%;
-            animation: rain-fall 0.5s linear infinite;
-        }
-        .snowflake {
-            position: absolute;
-            width: 5px; height: 5px;
-            background: white;
-            border-radius: 50%;
-            top: 50%; left: 50%;
-            animation: snow-fall 2s linear infinite;
-        }
-        .cloud {
-            width: 60px; height: 30px;
-            background: lightgray;
-            border-radius: 50%;
-            position: absolute;
-            animation: move-clouds 4s linear infinite alternate;
-        }
-        @keyframes rain-fall {
-            from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(10px); opacity: 0; }
-        }
-        @keyframes snow-fall {
-            from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(15px); opacity: 0; }
-        }
-        @keyframes move-clouds {
-            from { transform: translateX(-5px); }
-            to { transform: translateX(5px); }
         }
         .temperature { font-size: 18px; font-weight: bold; }
         .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -84,7 +42,10 @@
 </head>
 <body>
     <div class="weather-widget">
-        <div class="weather-icon" id="weather-animation"></div>
+        <div class="weather-icon" id="weather-icon-container">
+            <div class="sun-rays"></div>
+            <div class="sun"></div>
+        </div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -93,7 +54,7 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=55.7558&lon=37.6173&lang=ru_RU&limit=1';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=55.7512&lon=37.6184&lang=ru_RU&limit=1';
 
         const conditionsMap = {
             'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
@@ -103,55 +64,6 @@
             'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
             'thunderstorm-with-hail': 'Гроза с градом'
         };
-
-        function setWeatherAnimation(condition) {
-            const iconContainer = document.getElementById('weather-animation');
-            iconContainer.innerHTML = '';
-
-            if (condition === 'clear') {
-                let sun = document.createElement('div');
-                sun.classList.add('sun');
-                
-                let raysContainer = document.createElement('div');
-                raysContainer.classList.add('sun-rays');
-
-                for (let i = 0; i < 8; i++) {
-                    let ray = document.createElement('div');
-                    ray.classList.add('sun-ray');
-                    ray.style.transform = `rotate(${i * 45}deg) translate(30px)`;
-                    raysContainer.appendChild(ray);
-                }
-
-                iconContainer.appendChild(raysContainer);
-                iconContainer.appendChild(sun);
-            } else if (condition.includes('rain')) {
-                let cloud = document.createElement('div');
-                cloud.classList.add('cloud');
-                iconContainer.appendChild(cloud);
-                for (let i = 0; i < 5; i++) {
-                    let drop = document.createElement('div');
-                    drop.classList.add('rain-drop');
-                    drop.style.left = `${Math.random() * 40}px`;
-                    drop.style.animationDelay = `${Math.random()}s`;
-                    iconContainer.appendChild(drop);
-                }
-            } else if (condition.includes('snow')) {
-                let cloud = document.createElement('div');
-                cloud.classList.add('cloud');
-                iconContainer.appendChild(cloud);
-                for (let i = 0; i < 5; i++) {
-                    let snowflake = document.createElement('div');
-                    snowflake.classList.add('snowflake');
-                    snowflake.style.left = `${Math.random() * 40}px`;
-                    snowflake.style.animationDelay = `${Math.random()}s`;
-                    iconContainer.appendChild(snowflake);
-                }
-            } else if (condition.includes('cloud')) {
-                let cloud = document.createElement('div');
-                cloud.classList.add('cloud');
-                iconContainer.appendChild(cloud);
-            }
-        }
 
         async function getWeather() {
             try {
@@ -163,9 +75,41 @@
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
 
-                setWeatherAnimation(fact.condition);
+                updateWeatherIcon(fact.condition);
             } catch (error) {
                 console.error('Ошибка запроса:', error);
+            }
+        }
+
+        function updateWeatherIcon(condition) {
+            const iconContainer = document.querySelector('#weather-icon-container');
+            iconContainer.innerHTML = '';
+
+            if (condition === 'clear') {
+                iconContainer.innerHTML = `
+                    <div class="sun-rays"></div>
+                    <div class="sun"></div>
+                `;
+            } else if (condition.includes('rain')) {
+                iconContainer.innerHTML = `
+                    <div class="rain-cloud">
+                        <div class="cloud"></div>
+                        <div class="raindrops"></div>
+                    </div>
+                `;
+            } else if (condition.includes('snow')) {
+                iconContainer.innerHTML = `
+                    <div class="snow-cloud">
+                        <div class="cloud"></div>
+                        <div class="snowflakes"></div>
+                    </div>
+                `;
+            } else if (condition.includes('cloud')) {
+                iconContainer.innerHTML = `
+                    <div class="moving-cloud">
+                        <div class="cloud"></div>
+                    </div>
+                `;
             }
         }
 
