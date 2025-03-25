@@ -16,91 +16,60 @@
             text-align: center;
         }
         .weather-icon {
-            width: 80px; height: 80px; 
             position: relative;
+            width: 60px;
+            height: 60px;
         }
         .sun {
-            width: 50px; height: 50px;
-            background: radial-gradient(circle, yellow 50%, orange 80%);
+            width: 60px; height: 60px;
+            background: radial-gradient(circle, yellow 30%, orange);
             border-radius: 50%;
             position: absolute;
-            top: 15px; left: 15px;
         }
-        .rays {
+        .sun-rays {
+            position: absolute;
             width: 80px; height: 80px;
-            position: absolute;
-            top: 0; left: 0;
-            animation: spin 5s linear infinite;
+            top: -10px; left: -10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            animation: rotate 5s linear infinite;
         }
-        .rays div {
-            width: 6px; height: 20px;
+        .ray {
+            position: absolute;
+            width: 6px;
+            height: 20px;
             background: yellow;
-            position: absolute;
-            top: 30px; left: 37px;
-            transform-origin: center;
+            border-radius: 3px;
         }
-        .rays div:nth-child(1) { transform: rotate(0deg); }
-        .rays div:nth-child(2) { transform: rotate(45deg); }
-        .rays div:nth-child(3) { transform: rotate(90deg); }
-        .rays div:nth-child(4) { transform: rotate(135deg); }
-        .rays div:nth-child(5) { transform: rotate(180deg); }
-        .rays div:nth-child(6) { transform: rotate(225deg); }
-        .rays div:nth-child(7) { transform: rotate(270deg); }
-        .rays div:nth-child(8) { transform: rotate(315deg); }
-        
-        .cloud {
-            width: 70px; height: 40px;
-            background: gray;
-            border-radius: 50%;
-            position: absolute;
-            top: 20px; left: 10px;
+        .ray:nth-child(1) { transform: rotate(0deg) translateY(-30px); }
+        .ray:nth-child(2) { transform: rotate(45deg) translateY(-30px); }
+        .ray:nth-child(3) { transform: rotate(90deg) translateY(-30px); }
+        .ray:nth-child(4) { transform: rotate(135deg) translateY(-30px); }
+        .ray:nth-child(5) { transform: rotate(180deg) translateY(-30px); }
+        .ray:nth-child(6) { transform: rotate(225deg) translateY(-30px); }
+        .ray:nth-child(7) { transform: rotate(270deg) translateY(-30px); }
+        .ray:nth-child(8) { transform: rotate(315deg) translateY(-30px); }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .cloud::before {
-            content: "";
-            width: 50px; height: 50px;
-            background: gray;
-            border-radius: 50%;
-            position: absolute;
-            top: -20px; left: -10px;
-        }
-        .cloud::after {
-            content: "";
-            width: 40px; height: 40px;
-            background: gray;
-            border-radius: 50%;
-            position: absolute;
-            top: -10px; left: 40px;
-        }
-        .raindrops div {
-            width: 5px; height: 10px;
-            background: blue;
-            border-radius: 50%;
-            position: absolute;
-            top: 50px;
-            animation: rain 1s infinite;
-        }
-        .raindrops div:nth-child(1) { left: 15px; animation-delay: 0s; }
-        .raindrops div:nth-child(2) { left: 30px; animation-delay: 0.2s; }
-        .raindrops div:nth-child(3) { left: 45px; animation-delay: 0.4s; }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        @keyframes rain {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(20px); opacity: 0; }
-        }
+
+        .temperature { font-size: 18px; font-weight: bold; }
+        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
     </style>
 </head>
 <body>
     <div class="weather-widget">
         <div class="weather-icon">
-            <div class="sun"></div>
-            <div class="rays">
-                <div></div><div></div><div></div><div></div>
-                <div></div><div></div><div></div><div></div>
+            <div class="sun-rays">
+                <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
+                <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
             </div>
+            <div class="sun"></div>
         </div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
@@ -108,5 +77,36 @@
             <div>Ветер: <span id="wind-speed">-- м/с</span></div>
         </div>
     </div>
+    <script>
+        const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=55.7558&lon=37.6173&lang=ru_RU&limit=1';
+
+        const conditionsMap = {
+            'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
+            'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
+            'heavy-rain': 'Сильный дождь', 'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень',
+            'wet-snow': 'Дождь со снегом', 'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
+            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
+            'thunderstorm-with-hail': 'Гроза с градом'
+        };
+
+        async function getWeather() {
+            try {
+                const response = await fetch(apiUrl, { headers: { 'X-Yandex-API-Key': apiKey } });
+                const { fact } = await response.json();
+                if (!fact) throw new Error('Ошибка данных API');
+
+                document.querySelector('#temperature').textContent = `${fact.temp}°C`;
+                document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
+                document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
+
+            } catch (error) {
+                console.error('Ошибка запроса:', error);
+            }
+        }
+
+        getWeather();
+        setInterval(getWeather, 600000);
+    </script>
 </body>
 </html>
