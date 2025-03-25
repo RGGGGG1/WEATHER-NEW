@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=120, height=120, initial-scale=1.0">
-    <title>Виджет погоды</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анимированный виджет погоды</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; }
+        body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; }
         .weather-widget {
-            width: 120px; height: 120px;
+            width: 200px; height: 200px;
             background: #000; color: #fff;
             font-family: Arial, sans-serif;
             display: flex; flex-direction: column;
@@ -16,18 +16,27 @@
             text-align: center;
         }
         .weather-icon {
-            width: 50px; height: 50px; position: relative;
+            width: 100px; height: 100px; position: relative;
         }
-        .temperature { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .temperature { font-size: 24px; font-weight: bold; }
+        .details { font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 
         /* Анимации */
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-        @keyframes rain { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(20px); opacity: 0; } }
-        .raindrop {
-            position: absolute; width: 2px; height: 10px; background: #4aa3df;
-            top: 30%; animation: rain 1s infinite linear;
+        @keyframes rotateSun { 100% { transform: rotate(360deg); } }
+        @keyframes moveClouds { 0% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 100% { transform: translateX(-10px); } }
+        @keyframes rain { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(40px); opacity: 0; } }
+        @keyframes snow { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(50px); opacity: 0; } }
+        @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+        .raindrop, .snowflake {
+            position: absolute; width: 5px; height: 10px; background: #4aa3df;
+            top: 40%; animation: rain 1.5s infinite linear;
         }
+        .snowflake {
+            background: #fff; width: 6px; height: 6px; border-radius: 50%;
+            animation: snow 2s infinite linear;
+        }
+        .thunder { position: absolute; width: 80px; height: 10px; background: yellow; opacity: 0; animation: flash 1s infinite; }
     </style>
 </head>
 <body>
@@ -63,21 +72,47 @@
                 document.getElementById('wind-speed').textContent = `${fact.wind_speed} м/с`;
                 document.getElementById('weather-condition').textContent = CONDITIONS[fact.condition] || 'Неизвестно';
 
-                updateWeatherIcon(fact.condition, fact.icon);
+                updateWeatherIcon(fact.condition);
             } catch (error) {
                 console.error('Ошибка загрузки погоды:', error);
             }
         }
 
-        function updateWeatherIcon(condition, iconCode) {
+        function updateWeatherIcon(condition) {
             const iconContainer = document.getElementById('weather-icon');
-            iconContainer.innerHTML = `<img src="https://yastatic.net/weather/i/icons/funky/dark/${iconCode}.svg" style="animation: fadeIn 1s;">`;
+            iconContainer.innerHTML = '';
 
-            if (condition.includes('rain')) addRainEffect(iconContainer);
+            if (condition.includes('clear')) {
+                iconContainer.innerHTML = `<div style="width: 100px; height: 100px; background: yellow; border-radius: 50%; position: relative; animation: rotateSun 10s linear infinite;"></div>`;
+            }
+            if (condition.includes('cloudy') || condition.includes('overcast')) {
+                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; animation: moveClouds 5s infinite alternate;"></div>`;
+            }
+            if (condition.includes('rain')) {
+                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
+                    ${createDrops(10, 'raindrop')}
+                </div>`;
+            }
+            if (condition.includes('thunderstorm')) {
+                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
+                    ${createDrops(10, 'raindrop')}
+                    <div class="thunder"></div>
+                </div>`;
+            }
+            if (condition.includes('snow')) {
+                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
+                    ${createDrops(10, 'snowflake')}
+                </div>`;
+            }
+            if (condition.includes('wet-snow')) {
+                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
+                    ${createDrops(5, 'snowflake') + createDrops(5, 'raindrop')}
+                </div>`;
+            }
         }
 
-        function addRainEffect(container) {
-            container.innerHTML += Array.from({ length: 10 }, () => '<div class="raindrop" style="left:' + (Math.random() * 50) + 'px; animation-duration:' + (Math.random() * 0.5 + 0.5) + 's;"></div>').join('');
+        function createDrops(count, className) {
+            return Array.from({ length: count }, () => `<div class="${className}" style="left:${Math.random() * 80}px; animation-duration:${Math.random() * 1 + 1}s;"></div>`).join('');
         }
 
         fetchWeather();
