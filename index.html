@@ -52,25 +52,49 @@
         .ray:nth-child(7) { transform: rotate(270deg) translateY(-20px); }
         .ray:nth-child(8) { transform: rotate(315deg) translateY(-20px); }
 
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .cloud {
+            width: 60px; height: 30px;
+            background: lightgray;
+            border-radius: 20px;
+            position: relative;
+            animation: moveClouds 5s infinite linear alternate;
         }
 
+        @keyframes moveClouds {
+            0% { transform: translateX(-5px); }
+            100% { transform: translateX(5px); }
+        }
+
+        .rain {
+            position: absolute;
+            top: 30px;
+            left: 10px;
+            width: 40px;
+            height: 20px;
+        }
+
+        .raindrop {
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            background: lightblue;
+            border-radius: 2px;
+            animation: fall 1s infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
         .temperature { font-size: 14px; font-weight: bold; }
         .details { font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-
     </style>
 </head>
 <body>
     <div class="weather-widget">
-        <div class="weather-icon">
-            <div class="sun-rays">
-                <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
-                <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
-            </div>
-            <div class="sun"></div>
-        </div>
+        <div class="weather-icon" id="weather-icon"></div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
@@ -83,25 +107,39 @@
 
         const conditionsMap = {
             'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
-            'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
-            'heavy-rain': 'Сильный дождь', 'continuous-heavy-rain': 'Затяжной дождь', 'showers': 'Ливень',
-            'wet-snow': 'Дождь со снегом', 'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад',
-            'hail': 'Град', 'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем',
-            'thunderstorm-with-hail': 'Гроза с градом'
+            'rain': 'Дождь', 'snow': 'Снег', 'showers': 'Ливень', 'wet-snow': 'Снег с дождем',
+            'thunderstorm': 'Гроза', 'drizzle': 'Морось', 'hail': 'Град'
         };
 
         async function getWeather() {
             try {
                 const response = await fetch(apiUrl, { headers: { 'X-Yandex-API-Key': apiKey } });
                 const { fact } = await response.json();
-                if (!fact) throw new Error('Ошибка данных API');
 
-                document.querySelector('#temperature').textContent = `${fact.temp}°C`;
-                document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
-                document.querySelector('#weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
-
+                document.getElementById('temperature').textContent = `${fact.temp}°C`;
+                document.getElementById('wind-speed').textContent = `${fact.wind_speed} м/с`;
+                document.getElementById('weather-condition').textContent = conditionsMap[fact.condition] || 'Неизвестно';
+                
+                updateIcon(fact.condition);
             } catch (error) {
                 console.error('Ошибка запроса:', error);
+            }
+        }
+
+        function updateIcon(condition) {
+            const iconContainer = document.getElementById('weather-icon');
+            iconContainer.innerHTML = '';
+
+            if (condition === 'clear') {
+                iconContainer.innerHTML = `<div class="sun"></div><div class="sun-rays">
+                    ${Array(8).fill('<div class="ray"></div>').join('')}
+                </div>`;
+            } else if (condition.includes('cloudy') || condition === 'overcast') {
+                iconContainer.innerHTML = `<div class="cloud"></div>`;
+            } else if (condition.includes('rain')) {
+                iconContainer.innerHTML = `<div class="cloud"></div><div class="rain">
+                    ${Array.from({ length: 5 }, () => `<div class="raindrop" style="left:${Math.random() * 40}px;"></div>`).join('')}
+                </div>`;
             }
         }
 
