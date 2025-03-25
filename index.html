@@ -82,7 +82,7 @@
     </div>
     <script>
         const apiKey = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=53.1465&lon=140.7103&lang=ru_RU&limit=1'; // Координаты Николаевска-на-Амуре
+        const apiUrl = 'https://api.weather.yandex.ru/v2/forecast?lat=55.7558&lon=37.6173&lang=ru_RU&limit=1'; // Москва
 
         async function getWeather() {
             try {
@@ -92,26 +92,31 @@
 
                 document.querySelector('#temperature').textContent = `${fact.temp}°C`;
                 document.querySelector('#wind-speed').textContent = `${fact.wind_speed} м/с`;
+                document.querySelector('#weather-condition').textContent = fact.condition;
 
                 const iconContainer = document.querySelector('#weather-icon');
                 iconContainer.innerHTML = '';
 
+                let iconHtml = '';
+
                 if (fact.condition === 'clear') {
-                    iconContainer.innerHTML = `<div class="sun"></div>
+                    iconHtml = `<div class="sun"></div>
                         <div class="sun-rays">
                             ${Array(8).fill('<div class="ray"></div>').join('')}
                         </div>`;
                 } else if (fact.condition.includes('rain')) {
-                    iconContainer.innerHTML = `<div class="cloud"></div><div class="rain"></div>`;
-                    addElements(iconContainer.querySelector('.rain'), 'drop', 5);
+                    iconHtml = `<div class="cloud"></div><div class="rain"></div>`;
+                    addElements(iconContainer, 'drop', 5);
                     if (fact.condition.includes('thunderstorm')) {
-                        iconContainer.innerHTML += '<div class="lightning"></div>';
-                        iconContainer.querySelector('.lightning').style.display = 'block';
+                        iconHtml += '<div class="lightning"></div>';
                     }
                 } else if (fact.condition.includes('snow')) {
-                    iconContainer.innerHTML = `<div class="cloud"></div><div class="snow"></div>`;
-                    addElements(iconContainer.querySelector('.snow'), 'flake', 8, '❄');
+                    iconHtml = `<div class="cloud"></div><div class="snow"></div>`;
+                    addElements(iconContainer, 'flake', 8, '❄');
                 }
+
+                iconContainer.innerHTML = iconHtml;
+
             } catch (error) {
                 console.error('Ошибка запроса:', error);
             }
