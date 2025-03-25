@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анимированный виджет погоды</title>
+    <meta name="viewport" content="width=120, height=120, initial-scale=1.0">
+    <title>Виджет погоды</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        body { background: #000; display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; }
         .weather-widget {
-            width: 200px; height: 200px;
+            width: 120px; height: 120px;
             background: #000; color: #fff;
             font-family: Arial, sans-serif;
             display: flex; flex-direction: column;
@@ -16,107 +16,97 @@
             text-align: center;
         }
         .weather-icon {
-            width: 100px; height: 100px; position: relative;
+            width: 80px; height: 80px; 
+            position: relative;
         }
-        .temperature { font-size: 24px; font-weight: bold; }
-        .details { font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-
-        /* Анимации */
-        @keyframes rotateSun { 100% { transform: rotate(360deg); } }
-        @keyframes moveClouds { 0% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 100% { transform: translateX(-10px); } }
-        @keyframes rain { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(40px); opacity: 0; } }
-        @keyframes snow { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(50px); opacity: 0; } }
-        @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
-        .raindrop, .snowflake {
-            position: absolute; width: 5px; height: 10px; background: #4aa3df;
-            top: 40%; animation: rain 1.5s infinite linear;
+        .sun {
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, yellow 50%, orange 80%);
+            border-radius: 50%;
+            position: absolute;
+            top: 15px; left: 15px;
         }
-        .snowflake {
-            background: #fff; width: 6px; height: 6px; border-radius: 50%;
-            animation: snow 2s infinite linear;
+        .rays {
+            width: 80px; height: 80px;
+            position: absolute;
+            top: 0; left: 0;
+            animation: spin 5s linear infinite;
         }
-        .thunder { position: absolute; width: 80px; height: 10px; background: yellow; opacity: 0; animation: flash 1s infinite; }
+        .rays div {
+            width: 6px; height: 20px;
+            background: yellow;
+            position: absolute;
+            top: 30px; left: 37px;
+            transform-origin: center;
+        }
+        .rays div:nth-child(1) { transform: rotate(0deg); }
+        .rays div:nth-child(2) { transform: rotate(45deg); }
+        .rays div:nth-child(3) { transform: rotate(90deg); }
+        .rays div:nth-child(4) { transform: rotate(135deg); }
+        .rays div:nth-child(5) { transform: rotate(180deg); }
+        .rays div:nth-child(6) { transform: rotate(225deg); }
+        .rays div:nth-child(7) { transform: rotate(270deg); }
+        .rays div:nth-child(8) { transform: rotate(315deg); }
+        
+        .cloud {
+            width: 70px; height: 40px;
+            background: gray;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px; left: 10px;
+        }
+        .cloud::before {
+            content: "";
+            width: 50px; height: 50px;
+            background: gray;
+            border-radius: 50%;
+            position: absolute;
+            top: -20px; left: -10px;
+        }
+        .cloud::after {
+            content: "";
+            width: 40px; height: 40px;
+            background: gray;
+            border-radius: 50%;
+            position: absolute;
+            top: -10px; left: 40px;
+        }
+        .raindrops div {
+            width: 5px; height: 10px;
+            background: blue;
+            border-radius: 50%;
+            position: absolute;
+            top: 50px;
+            animation: rain 1s infinite;
+        }
+        .raindrops div:nth-child(1) { left: 15px; animation-delay: 0s; }
+        .raindrops div:nth-child(2) { left: 30px; animation-delay: 0.2s; }
+        .raindrops div:nth-child(3) { left: 45px; animation-delay: 0.4s; }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes rain {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
     </style>
 </head>
 <body>
     <div class="weather-widget">
-        <div class="weather-icon" id="weather-icon"></div>
+        <div class="weather-icon">
+            <div class="sun"></div>
+            <div class="rays">
+                <div></div><div></div><div></div><div></div>
+                <div></div><div></div><div></div><div></div>
+            </div>
+        </div>
         <div class="temperature" id="temperature">--°C</div>
         <div class="details">
             <div id="weather-condition">--</div>
             <div>Ветер: <span id="wind-speed">-- м/с</span></div>
         </div>
     </div>
-
-    <script>
-        const API_KEY = '37ce29f8-dd6b-43d8-885f-c2d2aa60e180';
-        const CITY = 'Москва';
-        const API_URL = `https://api.weather.yandex.ru/v2/forecast?lat=55.7558&lon=37.6173&lang=ru_RU&limit=1`;
-
-        const CONDITIONS = {
-            'clear': 'Ясно', 'partly-cloudy': 'Малооблачно', 'cloudy': 'Облачно', 'overcast': 'Пасмурно',
-            'drizzle': 'Морось', 'light-rain': 'Небольшой дождь', 'rain': 'Дождь', 'moderate-rain': 'Умеренный дождь',
-            'heavy-rain': 'Сильный дождь', 'showers': 'Ливень', 'wet-snow': 'Дождь со снегом',
-            'light-snow': 'Небольшой снег', 'snow': 'Снег', 'snow-showers': 'Снегопад', 'hail': 'Град',
-            'thunderstorm': 'Гроза', 'thunderstorm-with-rain': 'Гроза с дождем', 'thunderstorm-with-hail': 'Гроза с градом'
-        };
-
-        async function fetchWeather() {
-            try {
-                const response = await fetch(API_URL, { headers: { 'X-Yandex-API-Key': API_KEY } });
-                const { fact } = await response.json();
-                if (!fact) throw new Error('Ошибка API');
-
-                document.getElementById('temperature').textContent = `${fact.temp}°C`;
-                document.getElementById('wind-speed').textContent = `${fact.wind_speed} м/с`;
-                document.getElementById('weather-condition').textContent = CONDITIONS[fact.condition] || 'Неизвестно';
-
-                updateWeatherIcon(fact.condition);
-            } catch (error) {
-                console.error('Ошибка загрузки погоды:', error);
-            }
-        }
-
-        function updateWeatherIcon(condition) {
-            const iconContainer = document.getElementById('weather-icon');
-            iconContainer.innerHTML = '';
-
-            if (condition.includes('clear')) {
-                iconContainer.innerHTML = `<div style="width: 100px; height: 100px; background: yellow; border-radius: 50%; position: relative; animation: rotateSun 10s linear infinite;"></div>`;
-            }
-            if (condition.includes('cloudy') || condition.includes('overcast')) {
-                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; animation: moveClouds 5s infinite alternate;"></div>`;
-            }
-            if (condition.includes('rain')) {
-                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
-                    ${createDrops(10, 'raindrop')}
-                </div>`;
-            }
-            if (condition.includes('thunderstorm')) {
-                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
-                    ${createDrops(10, 'raindrop')}
-                    <div class="thunder"></div>
-                </div>`;
-            }
-            if (condition.includes('snow')) {
-                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
-                    ${createDrops(10, 'snowflake')}
-                </div>`;
-            }
-            if (condition.includes('wet-snow')) {
-                iconContainer.innerHTML = `<div style="width: 100px; height: 60px; background: gray; border-radius: 50%; position: relative;">
-                    ${createDrops(5, 'snowflake') + createDrops(5, 'raindrop')}
-                </div>`;
-            }
-        }
-
-        function createDrops(count, className) {
-            return Array.from({ length: count }, () => `<div class="${className}" style="left:${Math.random() * 80}px; animation-duration:${Math.random() * 1 + 1}s;"></div>`).join('');
-        }
-
-        fetchWeather();
-        setInterval(fetchWeather, 600000);
-    </script>
 </body>
 </html>
